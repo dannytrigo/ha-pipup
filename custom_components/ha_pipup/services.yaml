@@ -1,0 +1,137 @@
+start_pipup:
+  target:
+    entity:
+      integration: androidtv
+      domain: media_player
+setup_pipup:
+  target:
+    entity:
+      integration: androidtv
+      domain: media_player
+pipup:
+  target:
+    entity:
+      integration: androidtv
+      domain: media_player
+  fields:
+    duration:
+      name: Duration
+      description: The duration of the pop-up in seconds
+      required: false
+      example: 20
+      selector:
+        number:
+          min: 1
+    position:
+      name: Position
+      description: The position on the screen
+      required: false
+      example: Top Right
+      selector:
+        select:
+          options:
+            - label: Top Right
+              value: 0
+            - label: Top Left
+              value: 1
+            - label: Bottom Right
+              value: 2
+            - label: Bottom Left
+              value: 3
+            - label: Centre
+              value: 4
+    title:
+      name: Title
+      description: The title of the pop-up notification
+      required: false
+      example: Camera Alert
+      selector:
+        text:
+    title_colour:
+      name: Title Colour
+      description: The colour of the title
+      required: false
+      example: "#0066cc"
+      selector:
+        color_rgb:
+    title_size:
+      name: Title Size
+      description: The size of the title
+      required: false
+      example: 20
+      selector:
+        number:
+          min: 1
+    message:
+      name: Message
+      description: The message in the pop-up
+      required: false
+      example: Someone is at the door
+      selector:
+        text:
+    message_colour:
+      name: Message Colour
+      description: The colour of the message
+      required: false
+      example: "#000000"
+      selector:
+        color_rgb:
+    message_size:
+      name: Message Size
+      description: The size of the message
+      required: false
+      example: 14
+      selector:
+        number:
+          min: 1
+    background_colour:
+      name: Background Colour
+      description: The colour of the background
+      required: false
+      example: "#ffffff"
+      selector:
+        color_rgb:
+    media_image:
+      name: Image URI
+      description: The URI of an image to display
+      required: false
+      example: https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/cfcc3137009463.5731d08bd66a1.png
+      selector:
+        text:
+    media_video:
+      name: Image URI
+      description: The URI of a video to display
+      required: false
+      example: https://abc.com/video.mp4
+      selector:
+        text:
+    media_web:
+      name: Web URI
+      description: The URI of a web resource
+      required: false
+      example: https://abc.com/info.html
+      selector:
+        text:
+    media_width:
+      name: Media Width
+      description: The width of the media
+      required: false
+      example: 480
+      selector:
+        number:
+          min: 1
+    media_height:
+      name: Media Height
+      description: The height of the media
+      required: false
+      example: 640
+      selector:
+        number:
+          min: 1
+    image_filename:
+      name: Image Filename
+      description: The local path to an image to include in the notification
+      required: false
+      example: /media/cams/doorbell.jpg
+      selector:
+        text:

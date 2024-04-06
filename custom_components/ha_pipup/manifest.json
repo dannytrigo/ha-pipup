@@ -1,0 +1,13 @@
+{
+  "domain": "ha_pipup",
+  "codeowners": ["@dannytrigo"],
+  "config_flow": true,
+  "integration_type": "service",
+  "dependencies": ["androidtv"],
+  "documentation": "https://github.com/dannytrigo/ha-pipup/",
+  "issue_tracker": "https://github.com/dannytrigo/ha-pipup/issues",
+  "name": "HA PipUp",
+  "requirements": [],
+  "version": "0.0.1",
+  "loggers": []
+}
