@@ -99,7 +99,7 @@ pipup:
       selector:
         text:
     media_video:
-      name: Image URI
+      name: Video URI
       description: The URI of a video to display
       required: false
       example: https://abc.com/video.mp4
