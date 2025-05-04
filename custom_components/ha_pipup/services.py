@@ -9,7 +9,10 @@ from .const import *
 
 __LOGGER__ = logging.getLogger(__name__)
 
-PIPUP_SERVICE_SCHEMA = {
+# Define schema without entity_id requirement to handle both direct host and entity-based calls
+PIPUP_SERVICE_SCHEMA = vol.Schema({
+    vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,  # Make entity_id optional
+    vol.Optional(CONF_HOST): cv.string,  # Add direct host option
     vol.Optional(ATTR_DURATION): cv.positive_int,
     vol.Optional(ATTR_POSITION): cv.positive_int,
     vol.Optional(ATTR_TITLE): cv.string,
@@ -31,8 +34,12 @@ PIPUP_SERVICE_SCHEMA = {
     vol.Optional(ATTR_MEDIA_WIDTH): cv.positive_int,
     vol.Optional(ATTR_MEDIA_HEIGHT): cv.positive_int,
     vol.Optional(ATTR_IMAGE_FILENAME): cv.string,
-    vol.Optional(CONF_HOST): cv.string,  # Add direct host option
-}
+})
+
+# Simpler schema for ADB command services
+ADB_SERVICE_SCHEMA = vol.Schema({
+    vol.Required(ATTR_ENTITY_ID): cv.entity_ids
+})
 
 
 class Services:
@@ -41,16 +48,32 @@ class Services:
         self.hass = hass
 
     def register(self) -> bool:
-        # Always register services, even if androidtv is not available
-        self.hass.services.register(DOMAIN, "pipup", self.handle_pipup_service_call,
-                                    schema=cv.make_entity_service_schema(PIPUP_SERVICE_SCHEMA),
-                                    supports_response=SupportsResponse.OPTIONAL)
-        self.hass.services.register(DOMAIN, "start_pipup", self.handle_start_pipup_service_call,
-                                    schema=cv.make_entity_service_schema({}),
-                                    supports_response=SupportsResponse.OPTIONAL)
-        self.hass.services.register(DOMAIN, "setup_pipup", self.handle_setup_pipup_service_call,
-                                    schema=cv.make_entity_service_schema({}),
-                                    supports_response=SupportsResponse.OPTIONAL)
+        # Register our services with appropriate schemas
+        self.hass.services.register(
+            DOMAIN,
+            "pipup",
+            self.handle_pipup_service_call,
+            schema=PIPUP_SERVICE_SCHEMA,
+            supports_response=SupportsResponse.OPTIONAL
+        )
+
+        # These services still require androidtv entities
+        self.hass.services.register(
+            DOMAIN,
+            "start_pipup",
+            self.handle_start_pipup_service_call,
+            schema=ADB_SERVICE_SCHEMA,
+            supports_response=SupportsResponse.OPTIONAL
+        )
+
+        self.hass.services.register(
+            DOMAIN,
+            "setup_pipup",
+            self.handle_setup_pipup_service_call,
+            schema=ADB_SERVICE_SCHEMA,
+            supports_response=SupportsResponse.OPTIONAL
+        )
+
         return True
 
     def get_hosts(self, entity_ids: List[str]) -> List[str]:
@@ -65,30 +88,37 @@ class Services:
             for androidtv_platform in androidtv_platforms:
                 for entity_id in entity_ids:
                     if entity_id in androidtv_platform.entities:
-                        __LOGGER__.info(androidtv_platform.config_entry.data)
-                        __LOGGER__.info(androidtv_platform.config_entry.data[CONF_HOST])
-                        hosts.append(androidtv_platform.config_entry.data[CONF_HOST])
+                        try:
+                            host = androidtv_platform.config_entry.data[CONF_HOST]
+                            __LOGGER__.info(f"Resolved entity {entity_id} to host {host}")
+                            hosts.append(host)
+                        except KeyError:
+                            __LOGGER__.warning(f"Could not find host for entity {entity_id}")
         except Exception as e:
             __LOGGER__.error(f"Error getting hosts for entities {entity_ids}: {e}")
         return hosts
 
     async def handle_pipup_service_call(self, call: ServiceCall):
-        entity_ids = call.data.get(ATTR_ENTITY_ID, [])
+        # Get hosts either from direct specification or entity resolution
         hosts = []
 
         # First check if a direct host was provided
         direct_host = call.data.get(CONF_HOST)
         if direct_host:
             hosts = [direct_host]
-        elif entity_ids:
-            # Only try to resolve entity_ids if no direct host was provided
-            hosts = self.get_hosts(entity_ids)
+            __LOGGER__.info(f"Using directly specified host: {direct_host}")
+        elif ATTR_ENTITY_ID in call.data:
+            # Only try to resolve entity_ids if provided
+            entity_ids = call.data.get(ATTR_ENTITY_ID, [])
+            if entity_ids:
+                hosts = self.get_hosts(entity_ids)
+                __LOGGER__.info(f"Resolved entity IDs to hosts: {hosts}")
 
         if not hosts:
-            __LOGGER__.warning(
-                "No hosts found for PiPUP notification. Please provide either entity_ids or a direct host.")
+            error_msg = "No hosts found for PiPUP notification. Please provide either entity_ids or a direct host."
+            __LOGGER__.warning(error_msg)
             if call.return_response:
-                return {"status": False, "error": "No hosts found"}
+                return {"status": False, "error": error_msg}
             return None
 
         data = {}
@@ -117,13 +147,13 @@ class Services:
                 files = {}
                 image_file = open(image_filename, 'rb')
                 files['image'] = image_file
-                # __LOGGER__.info(requests.Request('POST', f'http://host:7979/notify', files=files, data=data).prepare().body)
                 post_req = lambda host: requests.post(f'http://{host}:7979/notify', files=files, data=data)
             else:
                 post_req = lambda host: requests.post(f'http://{host}:7979/notify', json=data)
 
             __LOGGER__.info(f"Sending PiPUP notification to hosts: {hosts}")
-            __LOGGER__.info(data)
+            __LOGGER__.debug(f"PiPUP notification data: {data}")
+
             for host in hosts:
                 try:
                     r = await self.hass.async_add_executor_job(lambda: post_req(host))

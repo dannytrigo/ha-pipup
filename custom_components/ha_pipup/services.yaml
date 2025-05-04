@@ -9,10 +9,12 @@ setup_pipup:
       integration: androidtv
       domain: media_player
 pipup:
+  # Make target optional
   target:
     entity:
       integration: androidtv
       domain: media_player
+    required: false
   fields:
     host:
       name: Host
