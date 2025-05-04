@@ -3,7 +3,7 @@
   "codeowners": ["@dannytrigo"],
   "config_flow": true,
   "integration_type": "service",
-  "dependencies": ["androidtv"],
+  "after_dependencies": ["androidtv"],
   "documentation": "https://github.com/dannytrigo/ha-pipup/",
   "issue_tracker": "https://github.com/dannytrigo/ha-pipup/issues",
   "name": "HA PipUp",

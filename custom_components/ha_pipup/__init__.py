@@ -16,18 +16,18 @@ def setup(hass: HomeAssistant, config) -> bool:
     __LOGGER__.info("Setting up ha-pipup services")
 
     # Check if androidtv is loaded
-    if ANDROIDTV_DOMAIN in hass.data:
+    if ANDROIDTV_DOMAIN in hass.config.components:
         __LOGGER__.info("AndroidTV integration is loaded")
     else:
         __LOGGER__.warning("AndroidTV integration is not loaded. Some functionality will be limited.")
 
     # Initialize services
-    services = Services(hass)
-    result = services.register()
+    svcs = Services(hass)
+    result = svcs.register()
 
     # Store services instance for potential use by config entries
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN]["services"] = services
+    hass.data[DOMAIN]["services"] = svcs
 
     return result
 

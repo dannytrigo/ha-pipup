@@ -11,7 +11,7 @@ __LOGGER__ = logging.getLogger(__name__)
 
 # Define schema without entity_id requirement to handle both direct host and entity-based calls
 PIPUP_SERVICE_SCHEMA = vol.Schema({
-    vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,  # Make entity_id optional
+    vol.Optional(ATTR_ENTITY_ID): cv.entity_id,  # Make entity_id optional
     vol.Optional(CONF_HOST): cv.string,  # Add direct host option
     vol.Optional(ATTR_DURATION): cv.positive_int,
     vol.Optional(ATTR_POSITION): cv.positive_int,
@@ -76,26 +76,25 @@ class Services:
 
         return True
 
-    def get_hosts(self, entity_ids: List[str]) -> List[str]:
+    def get_hosts(self, entity_id: str) -> List[str]:
         hosts = []
         try:
             # Check if androidtv integration is loaded
-            if ANDROIDTV_DOMAIN not in self.hass.data:
-                __LOGGER__.warning(f"AndroidTV integration not found, cannot resolve entity_ids to hosts")
-                return hosts
+            # if ANDROIDTV_DOMAIN not in self.hass.data:
+            #     __LOGGER__.warning(f"AndroidTV integration not found, cannot resolve entity_ids to hosts")
+            #     return hosts
 
             androidtv_platforms = entity_platform.async_get_platforms(self.hass, ANDROIDTV_DOMAIN)
             for androidtv_platform in androidtv_platforms:
-                for entity_id in entity_ids:
-                    if entity_id in androidtv_platform.entities:
-                        try:
-                            host = androidtv_platform.config_entry.data[CONF_HOST]
-                            __LOGGER__.info(f"Resolved entity {entity_id} to host {host}")
-                            hosts.append(host)
-                        except KeyError:
-                            __LOGGER__.warning(f"Could not find host for entity {entity_id}")
+                if entity_id in androidtv_platform.entities:
+                    try:
+                        host = androidtv_platform.config_entry.data[CONF_HOST]
+                        __LOGGER__.info(f"Resolved entity {entity_id} to host {host}")
+                        hosts.append(host)
+                    except KeyError:
+                        __LOGGER__.warning(f"Could not find host for entity {entity_id}")
         except Exception as e:
-            __LOGGER__.error(f"Error getting hosts for entities {entity_ids}: {e}")
+            __LOGGER__.error(f"Error getting hosts for entity {entity_id}: {e}")
         return hosts
 
     async def handle_pipup_service_call(self, call: ServiceCall):
@@ -109,9 +108,9 @@ class Services:
             __LOGGER__.info(f"Using directly specified host: {direct_host}")
         elif ATTR_ENTITY_ID in call.data:
             # Only try to resolve entity_ids if provided
-            entity_ids = call.data.get(ATTR_ENTITY_ID, [])
-            if entity_ids:
-                hosts = self.get_hosts(entity_ids)
+            entity_id = call.data.get(ATTR_ENTITY_ID, None)
+            if entity_id:
+                hosts = self.get_hosts(entity_id)
                 __LOGGER__.info(f"Resolved entity IDs to hosts: {hosts}")
 
         if not hosts:

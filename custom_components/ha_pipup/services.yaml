@@ -9,13 +9,16 @@ setup_pipup:
       integration: androidtv
       domain: media_player
 pipup:
-  # Make target optional
-  target:
-    entity:
-      integration: androidtv
-      domain: media_player
-    required: false
   fields:
+    entity_id:
+      name: Android TV
+      description: "The Android TV entity ID to control (optional)"
+      example: "media_player.android_tv"
+      required: false
+      selector:
+        entity:
+          integration: androidtv
+          domain: media_player
     host:
       name: Host
       description: IP address of the Android TV device (alternative to entity selection)
