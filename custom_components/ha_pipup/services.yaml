@@ -43,15 +43,15 @@ pipup:
         select:
           options:
             - label: Top Right
-              value: 0
+              value: "0"
             - label: Top Left
-              value: 1
+              value: "1"
             - label: Bottom Right
-              value: 2
+              value: "2"
             - label: Bottom Left
-              value: 3
+              value: "3"
             - label: Centre
-              value: 4
+              value: "4"
     title:
       name: Title
       description: The title of the pop-up notification
@@ -160,9 +160,9 @@ tvoverlay:
           domain: media_player
     host:
       name: Host
-      description: IP address of the Android TV device (alternative to entity selection)
+      description: IP address of the Android TV device, optionally with port (alternative to entity selection). Defaults to port 5001 if not specified.
       required: false
-      example: "192.168.1.100"
+      example: "192.168.1.100:5001"
       selector:
         text:
     duration:
@@ -182,15 +182,15 @@ tvoverlay:
         select:
           options:
             - label: Top Right
-              value: 0
+              value: "0"
             - label: Top Left
-              value: 1
+              value: "1"
             - label: Bottom Right
-              value: 2
+              value: "2"
             - label: Bottom Left
-              value: 3
+              value: "3"
             - label: Centre
-              value: 4
+              value: "4"
     text:
       name: Text
       description: The text to display in the overlay
@@ -238,11 +238,11 @@ tvoverlay:
         select:
           options:
             - label: Left
-              value: 0
+              value: "0"
             - label: Center
-              value: 1
+              value: "1"
             - label: Right
-              value: 2
+              value: "2"
     background_colour:
       name: Background Colour
       description: The colour of the background
