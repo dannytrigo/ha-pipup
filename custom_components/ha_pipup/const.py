@@ -19,6 +19,15 @@ ATTR_MEDIA_WEB = "media_web"
 ATTR_MEDIA_WIDTH = "media_width"
 ATTR_MEDIA_HEIGHT = "media_height"
 ATTR_IMAGE_FILENAME = "image_filename"
+
+# TVOverlay attributes
+ATTR_TEXT = "text"
+ATTR_TEXT_COLOR = "text_color"
+ATTR_TEXT_SIZE = "text_size"
+ATTR_TRANSPARENCY = "transparency"
+ATTR_FONT = "font"
+ATTR_ALIGNMENT = "alignment"
+
 POST_VARS = {
     ATTR_DURATION: "duration",
     ATTR_POSITION: "position",
@@ -38,4 +47,17 @@ MEDIA_POST_VARS = {
 MEDIA_PARAM_VARS = {
     ATTR_MEDIA_WIDTH: "width",
     ATTR_MEDIA_HEIGHT: "height",
+}
+
+# TVOverlay POST variables
+TVOVERLAY_POST_VARS = {
+    ATTR_DURATION: "duration",
+    ATTR_POSITION: "position",
+    ATTR_TEXT: "text",
+    ATTR_TEXT_COLOR: "textColor",
+    ATTR_TEXT_SIZE: "textSize",
+    ATTR_TRANSPARENCY: "transparency",
+    ATTR_FONT: "font",
+    ATTR_ALIGNMENT: "alignment",
+    ATTR_BACKGROUND_COLOUR: "backgroundColor",
 }
