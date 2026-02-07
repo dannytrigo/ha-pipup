@@ -36,29 +36,21 @@ PIPUP_SERVICE_SCHEMA = vol.Schema({
     vol.Optional(ATTR_IMAGE_FILENAME): cv.string,
 })
 
-# TVOverlay service schema
+# TVOverlay service schema - matches TVOverlay API
 TVOVERLAY_SERVICE_SCHEMA = vol.Schema({
     vol.Optional(ATTR_ENTITY_ID): cv.entity_id,
     vol.Optional(CONF_HOST): cv.string,
+    vol.Optional(ATTR_ID): cv.string,
+    vol.Optional(ATTR_TITLE): cv.string,
+    vol.Optional(ATTR_MESSAGE): cv.string,
+    vol.Optional(ATTR_SOURCE): cv.string,
+    vol.Optional(ATTR_IMAGE): cv.string,
+    vol.Optional(ATTR_VIDEO): cv.string,
+    vol.Optional(ATTR_LARGE_ICON): cv.string,
+    vol.Optional(ATTR_SMALL_ICON): cv.string,
+    vol.Optional(ATTR_SMALL_ICON_COLOR): cv.string,
+    vol.Optional(ATTR_CORNER): cv.string,
     vol.Optional(ATTR_DURATION): cv.positive_int,
-    vol.Optional(ATTR_POSITION): cv.positive_int,
-    vol.Optional(ATTR_TEXT): cv.string,
-    vol.Optional(ATTR_TEXT_COLOR): vol.All(
-        vol.Coerce(tuple), vol.ExactSequence((cv.byte,) * 3)
-    ),
-    vol.Optional(ATTR_TEXT_SIZE): cv.positive_int,
-    vol.Optional(ATTR_TRANSPARENCY): cv.positive_int,
-    vol.Optional(ATTR_FONT): cv.string,
-    vol.Optional(ATTR_ALIGNMENT): cv.positive_int,
-    vol.Optional(ATTR_BACKGROUND_COLOUR): vol.All(
-        vol.Coerce(tuple), vol.ExactSequence((cv.byte,) * 3)
-    ),
-    vol.Optional(ATTR_MEDIA_IMAGE): cv.string,
-    vol.Optional(ATTR_MEDIA_VIDEO): cv.string,
-    vol.Optional(ATTR_MEDIA_WEB): cv.string,
-    vol.Optional(ATTR_MEDIA_WIDTH): cv.positive_int,
-    vol.Optional(ATTR_MEDIA_HEIGHT): cv.positive_int,
-    vol.Optional(ATTR_IMAGE_FILENAME): cv.string,
 })
 
 # Simpler schema for ADB command services
@@ -269,37 +261,17 @@ class Services:
                 return {"status": False, "error": error_msg}
             return None
 
+        # Build the data dictionary directly from TVOverlay API fields
         data = {}
         for attr in TVOVERLAY_POST_VARS.keys():
             val = call.data.get(attr, None)
-            if val:
-                if isinstance(val, tuple):
-                    val = f'#{val[0]:02x}{val[1]:02x}{val[2]:02x}'
+            if val is not None:
                 data[TVOVERLAY_POST_VARS[attr]] = val
-        
-        # Add media support similar to pipup
-        for attr in MEDIA_POST_VARS.keys():
-            val = call.data.get(attr, None)
-            if val:
-                params = {"uri": val}
-                for param in MEDIA_PARAM_VARS.keys():
-                    param_val = call.data.get(param, None)
-                    if param_val:
-                        params[MEDIA_PARAM_VARS[param]] = param_val
-                data["media"] = {MEDIA_POST_VARS[attr]: params}
 
-        image_file = None
         status_ok = True
         results = {}
         try:
-            image_filename = call.data.get(ATTR_IMAGE_FILENAME, None)
-            if image_filename:
-                files = {}
-                image_file = open(image_filename, 'rb')
-                files['image'] = image_file
-                post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', files=files, data=data)
-            else:
-                post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', json=data)
+            post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', json=data)
 
             __LOGGER__.info(f"Sending TVOverlay notification to hosts: {hosts}")
             __LOGGER__.debug(f"TVOverlay notification data: {data}")
@@ -322,9 +294,9 @@ class Services:
                     status_ok = False
                     results[host_entry] = str(e)
                     __LOGGER__.error(f"Exception sending TVOverlay notification to {host}:{port}: {e}")
-        finally:
-            if image_file:
-                image_file.close()
+        except Exception as e:
+            __LOGGER__.error(f"Unexpected error in TVOverlay service: {e}")
+            status_ok = False
 
         if call.return_response:
             return {"status": status_ok, "results": results}

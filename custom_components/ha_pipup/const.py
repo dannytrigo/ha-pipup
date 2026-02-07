@@ -21,12 +21,14 @@ ATTR_MEDIA_HEIGHT = "media_height"
 ATTR_IMAGE_FILENAME = "image_filename"
 
 # TVOverlay attributes
-ATTR_TEXT = "text"
-ATTR_TEXT_COLOR = "text_color"
-ATTR_TEXT_SIZE = "text_size"
-ATTR_TRANSPARENCY = "transparency"
-ATTR_FONT = "font"
-ATTR_ALIGNMENT = "alignment"
+ATTR_ID = "id"
+ATTR_SOURCE = "source"
+ATTR_IMAGE = "image"
+ATTR_VIDEO = "video"
+ATTR_LARGE_ICON = "large_icon"
+ATTR_SMALL_ICON = "small_icon"
+ATTR_SMALL_ICON_COLOR = "small_icon_color"
+ATTR_CORNER = "corner"
 
 POST_VARS = {
     ATTR_DURATION: "duration",
@@ -49,15 +51,17 @@ MEDIA_PARAM_VARS = {
     ATTR_MEDIA_HEIGHT: "height",
 }
 
-# TVOverlay POST variables
+# TVOverlay POST variables - direct API mapping
 TVOVERLAY_POST_VARS = {
+    ATTR_ID: "id",
+    ATTR_TITLE: "title",
+    ATTR_MESSAGE: "message",
+    ATTR_SOURCE: "source",
+    ATTR_IMAGE: "image",
+    ATTR_VIDEO: "video",
+    ATTR_LARGE_ICON: "largeIcon",
+    ATTR_SMALL_ICON: "smallIcon",
+    ATTR_SMALL_ICON_COLOR: "smallIconColor",
+    ATTR_CORNER: "corner",
     ATTR_DURATION: "duration",
-    ATTR_POSITION: "position",
-    ATTR_TEXT: "text",
-    ATTR_TEXT_COLOR: "textColor",
-    ATTR_TEXT_SIZE: "textSize",
-    ATTR_TRANSPARENCY: "transparency",
-    ATTR_FONT: "font",
-    ATTR_ALIGNMENT: "alignment",
-    ATTR_BACKGROUND_COLOUR: "backgroundColor",
 }

@@ -165,132 +165,90 @@ tvoverlay:
       example: "192.168.1.100:5001"
       selector:
         text:
+    id:
+      name: ID
+      description: A unique identifier for the notification. Can be used to edit a notification while in queue or being displayed.
+      required: false
+      example: "cam1_motion"
+      selector:
+        text:
+    title:
+      name: Title
+      description: The main text of the notification
+      required: false
+      example: Camera 1
+      selector:
+        text:
+    message:
+      name: Message
+      description: The secondary text of the notification
+      required: false
+      example: Motion detected at front door
+      selector:
+        text:
+    source:
+      name: Source
+      description: Extra info text for the notification
+      required: false
+      example: Front Door Camera
+      selector:
+        text:
+    image:
+      name: Image
+      description: Image to display. Can be MDI icon (mdi:alert), image URL, or Base64 encoded bitmap
+      required: false
+      example: https://example.com/camera.jpg
+      selector:
+        text:
+    video:
+      name: Video
+      description: Video URL to display. Supports RTSP, HLS, DASH, and SmoothStreaming
+      required: false
+      example: rtsp://10.10.10.118:8554/front_door
+      selector:
+        text:
+    large_icon:
+      name: Large Icon
+      description: Large icon to display. Can be MDI icon (mdi:camera), image URL, or Base64 encoded bitmap
+      required: false
+      example: mdi:camera
+      selector:
+        text:
+    small_icon:
+      name: Small Icon
+      description: Small icon to display. Can be MDI icon (mdi:bell), image URL, or Base64 encoded bitmap
+      required: false
+      example: mdi:bell
+      selector:
+        text:
+    small_icon_color:
+      name: Small Icon Color
+      description: Color tint for the small icon (hex color with or without #)
+      required: false
+      example: "#FF5722"
+      selector:
+        text:
+    corner:
+      name: Corner
+      description: Position of the notification on screen
+      required: false
+      example: bottom_end
+      selector:
+        select:
+          options:
+            - label: Bottom Right
+              value: bottom_end
+            - label: Bottom Left
+              value: bottom_start
+            - label: Top Right
+              value: top_end
+            - label: Top Left
+              value: top_start
     duration:
       name: Duration
-      description: The duration of the overlay in seconds
+      description: Duration that the notification will stay visible in seconds
       required: false
       example: 20
       selector:
         number:
           min: 1
-    position:
-      name: Position
-      description: The position on the screen
-      required: false
-      example: Top Right
-      selector:
-        select:
-          options:
-            - label: Top Right
-              value: "0"
-            - label: Top Left
-              value: "1"
-            - label: Bottom Right
-              value: "2"
-            - label: Bottom Left
-              value: "3"
-            - label: Centre
-              value: "4"
-    text:
-      name: Text
-      description: The text to display in the overlay
-      required: false
-      example: Someone is at the door
-      selector:
-        text:
-    text_color:
-      name: Text Colour
-      description: The colour of the text
-      required: false
-      example: "#ffffff"
-      selector:
-        color_rgb:
-    text_size:
-      name: Text Size
-      description: The size of the text
-      required: false
-      example: 20
-      selector:
-        number:
-          min: 1
-    transparency:
-      name: Transparency
-      description: The transparency level (0-100)
-      required: false
-      example: 80
-      selector:
-        number:
-          min: 0
-          max: 100
-    font:
-      name: Font
-      description: The font to use for the text
-      required: false
-      example: sans-serif
-      selector:
-        text:
-    alignment:
-      name: Alignment
-      description: Text alignment
-      required: false
-      example: Left
-      selector:
-        select:
-          options:
-            - label: Left
-              value: "0"
-            - label: Center
-              value: "1"
-            - label: Right
-              value: "2"
-    background_colour:
-      name: Background Colour
-      description: The colour of the background
-      required: false
-      example: "#000000"
-      selector:
-        color_rgb:
-    media_image:
-      name: Image URI
-      description: The URI of an image to display
-      required: false
-      example: https://example.com/image.png
-      selector:
-        text:
-    media_video:
-      name: Video URI
-      description: The URI of a video to display
-      required: false
-      example: https://example.com/video.mp4
-      selector:
-        text:
-    media_web:
-      name: Web URI
-      description: The URI of a web resource
-      required: false
-      example: https://example.com/info.html
-      selector:
-        text:
-    media_width:
-      name: Media Width
-      description: The width of the media
-      required: false
-      example: 480
-      selector:
-        number:
-          min: 1
-    media_height:
-      name: Media Height
-      description: The height of the media
-      required: false
-      example: 640
-      selector:
-        number:
-          min: 1
-    image_filename:
-      name: Image Filename
-      description: The local path to an image to include in the notification
-      required: false
-      example: /media/cams/doorbell.jpg
-      selector:
-        text:
