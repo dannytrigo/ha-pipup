@@ -36,6 +36,23 @@ PIPUP_SERVICE_SCHEMA = vol.Schema({
     vol.Optional(ATTR_IMAGE_FILENAME): cv.string,
 })
 
+# TVOverlay service schema - matches TVOverlay API
+TVOVERLAY_SERVICE_SCHEMA = vol.Schema({
+    vol.Optional(ATTR_ENTITY_ID): cv.entity_id,
+    vol.Optional(CONF_HOST): cv.string,
+    vol.Optional(ATTR_ID): cv.string,
+    vol.Optional(ATTR_TITLE): cv.string,
+    vol.Optional(ATTR_MESSAGE): cv.string,
+    vol.Optional(ATTR_SOURCE): cv.string,
+    vol.Optional(ATTR_IMAGE): cv.string,
+    vol.Optional(ATTR_VIDEO): cv.string,
+    vol.Optional(ATTR_LARGE_ICON): cv.string,
+    vol.Optional(ATTR_SMALL_ICON): cv.string,
+    vol.Optional(ATTR_SMALL_ICON_COLOR): cv.string,
+    vol.Optional(ATTR_CORNER): cv.string,
+    vol.Optional(ATTR_DURATION): cv.positive_int,
+})
+
 # Simpler schema for ADB command services
 ADB_SERVICE_SCHEMA = vol.Schema({
     vol.Required(ATTR_ENTITY_ID): cv.entity_ids
@@ -54,6 +71,15 @@ class Services:
             "pipup",
             self.handle_pipup_service_call,
             schema=PIPUP_SERVICE_SCHEMA,
+            supports_response=SupportsResponse.OPTIONAL
+        )
+
+        # Register TVOverlay service
+        self.hass.services.register(
+            DOMAIN,
+            "tvoverlay",
+            self.handle_tvoverlay_service_call,
+            schema=TVOVERLAY_SERVICE_SCHEMA,
             supports_response=SupportsResponse.OPTIONAL
         )
 
@@ -146,24 +172,31 @@ class Services:
                 files = {}
                 image_file = open(image_filename, 'rb')
                 files['image'] = image_file
-                post_req = lambda host: requests.post(f'http://{host}:7979/notify', files=files, data=data)
+                post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', files=files, data=data)
             else:
-                post_req = lambda host: requests.post(f'http://{host}:7979/notify', json=data)
+                post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', json=data)
 
             __LOGGER__.info(f"Sending PiPUP notification to hosts: {hosts}")
             __LOGGER__.debug(f"PiPUP notification data: {data}")
 
-            for host in hosts:
+            for host_entry in hosts:
+                # Check if port is included in the host string
+                if ':' in host_entry:
+                    host, port = host_entry.rsplit(':', 1)
+                else:
+                    host = host_entry
+                    port = '7979'  # Default PiPUP port
+                
                 try:
-                    r = await self.hass.async_add_executor_job(lambda: post_req(host))
-                    results[host] = r.status_code
+                    r = await self.hass.async_add_executor_job(lambda: post_req(host, port))
+                    results[host_entry] = r.status_code
                     if r.status_code != 200:
                         status_ok = False
-                    __LOGGER__.info(f"PiPUP notification to {host} returned status {r.status_code}")
+                    __LOGGER__.info(f"PiPUP notification to {host}:{port} returned status {r.status_code}")
                 except Exception as e:
                     status_ok = False
-                    results[host] = str(e)
-                    __LOGGER__.error(f"Exception sending PiPUP notification to {host}: {e}")
+                    results[host_entry] = str(e)
+                    __LOGGER__.error(f"Exception sending PiPUP notification to {host}:{port}: {e}")
         finally:
             if image_file:
                 image_file.close()
@@ -202,5 +235,70 @@ class Services:
         success = await self.adb_command(entity_ids, 'adb shell appops set nl.rogro82.pipup SYSTEM_ALERT_WINDOW allow')
         if call.return_response:
             return {"status": success}
+        else:
+            return None
+
+    async def handle_tvoverlay_service_call(self, call: ServiceCall):
+        # Get hosts either from direct specification or entity resolution
+        hosts = []
+
+        # First check if a direct host was provided
+        direct_host = call.data.get(CONF_HOST)
+        if direct_host:
+            hosts = [direct_host]
+            __LOGGER__.info(f"Using directly specified host: {direct_host}")
+        elif ATTR_ENTITY_ID in call.data:
+            # Only try to resolve entity_ids if provided
+            entity_id = call.data.get(ATTR_ENTITY_ID, None)
+            if entity_id:
+                hosts = self.get_hosts(entity_id)
+                __LOGGER__.info(f"Resolved entity IDs to hosts: {hosts}")
+
+        if not hosts:
+            error_msg = "No hosts found for TVOverlay notification. Please provide either entity_ids or a direct host."
+            __LOGGER__.warning(error_msg)
+            if call.return_response:
+                return {"status": False, "error": error_msg}
+            return None
+
+        # Build the data dictionary directly from TVOverlay API fields
+        data = {}
+        for attr in TVOVERLAY_POST_VARS.keys():
+            val = call.data.get(attr, None)
+            if val is not None:
+                data[TVOVERLAY_POST_VARS[attr]] = val
+
+        status_ok = True
+        results = {}
+        try:
+            post_req = lambda host, port: requests.post(f'http://{host}:{port}/notify', json=data)
+
+            __LOGGER__.info(f"Sending TVOverlay notification to hosts: {hosts}")
+            __LOGGER__.debug(f"TVOverlay notification data: {data}")
+
+            for host_entry in hosts:
+                # Check if port is included in the host string
+                if ':' in host_entry:
+                    host, port = host_entry.rsplit(':', 1)
+                else:
+                    host = host_entry
+                    port = '5001'  # Default TVOverlay port
+                
+                try:
+                    r = await self.hass.async_add_executor_job(lambda: post_req(host, port))
+                    results[host_entry] = r.status_code
+                    if r.status_code != 200:
+                        status_ok = False
+                    __LOGGER__.info(f"TVOverlay notification to {host}:{port} returned status {r.status_code}")
+                except Exception as e:
+                    status_ok = False
+                    results[host_entry] = str(e)
+                    __LOGGER__.error(f"Exception sending TVOverlay notification to {host}:{port}: {e}")
+        except Exception as e:
+            __LOGGER__.error(f"Unexpected error in TVOverlay service: {e}")
+            status_ok = False
+
+        if call.return_response:
+            return {"status": status_ok, "results": results}
         else:
             return None

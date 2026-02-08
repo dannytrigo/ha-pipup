@@ -19,6 +19,17 @@ ATTR_MEDIA_WEB = "media_web"
 ATTR_MEDIA_WIDTH = "media_width"
 ATTR_MEDIA_HEIGHT = "media_height"
 ATTR_IMAGE_FILENAME = "image_filename"
+
+# TVOverlay attributes
+ATTR_ID = "id"
+ATTR_SOURCE = "source"
+ATTR_IMAGE = "image"
+ATTR_VIDEO = "video"
+ATTR_LARGE_ICON = "large_icon"
+ATTR_SMALL_ICON = "small_icon"
+ATTR_SMALL_ICON_COLOR = "small_icon_color"
+ATTR_CORNER = "corner"
+
 POST_VARS = {
     ATTR_DURATION: "duration",
     ATTR_POSITION: "position",
@@ -38,4 +49,19 @@ MEDIA_POST_VARS = {
 MEDIA_PARAM_VARS = {
     ATTR_MEDIA_WIDTH: "width",
     ATTR_MEDIA_HEIGHT: "height",
+}
+
+# TVOverlay POST variables - direct API mapping
+TVOVERLAY_POST_VARS = {
+    ATTR_ID: "id",
+    ATTR_TITLE: "title",
+    ATTR_MESSAGE: "message",
+    ATTR_SOURCE: "source",
+    ATTR_IMAGE: "image",
+    ATTR_VIDEO: "video",
+    ATTR_LARGE_ICON: "largeIcon",
+    ATTR_SMALL_ICON: "smallIcon",
+    ATTR_SMALL_ICON_COLOR: "smallIconColor",
+    ATTR_CORNER: "corner",
+    ATTR_DURATION: "duration",
 }
